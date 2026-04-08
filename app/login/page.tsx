@@ -7,32 +7,36 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [nisnip, setNisnip] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const router = useRouter();
+  const router = useRouter();
 
-const handleLogin = async () => {
-  const { data, error } = await supabase
-    .from("user")
-    .select("*")
-    .eq("nisnip", nisnip)
-    .eq("password", password)
-    .single();
+  const handleLogin = async () => {
+    setErrorMsg("");
+    setLoading(true);
 
-  if (error || !data) {
-    alert("Login gagal!");
-    return;
-  }
+    const { data, error } = await supabase
+      .from("user")
+      .select("*")
+      .eq("nisnip", nisnip)
+      .eq("password", password)
+      .single();
 
-  if (data.role === "admin") {
-    router.push("/admin");
-  } else if (data.role === "siswa") {
-    router.push("/siswa");
-  } else {
-    alert("Role tidak dikenali!");
-  }
+    if (error || !data) {
+      setErrorMsg("NIS/NIP atau Password Salah");
+      setLoading(false);
+      return;
+    }
 
-  localStorage.setItem("user", JSON.stringify(data));
-};
+    localStorage.setItem("nisnip", data.nisnip);
+
+    if (data.role === "admin") {
+      router.replace("/admin");
+    } else {
+      router.replace("/siswa");
+    }
+  };
 
   return (
     <div className="login-container">
@@ -54,12 +58,24 @@ const handleLogin = async () => {
           }}
         >
           <label>NIS/NIP :</label>
+
+          {errorMsg && (
+            <p style={{ color: "red", marginBottom: "10px" }}>
+              {errorMsg}
+            </p>
+          )}
+
           <input onChange={(e) => setNisnip(e.target.value)} />
 
           <label>Password :</label>
-          <input type="password" onChange={(e) => setPassword(e.target.value)} />
+          <input
+            type="password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-          <button className="login-page-btn">Login</button>
+          <button className="login-page-btn" disabled={loading}>
+            {loading ? "Loading..." : "Login"}
+          </button>
         </form>
 
       </div>

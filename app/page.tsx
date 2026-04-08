@@ -270,7 +270,7 @@ export default function Home() {
             </div>
             <div>
               <h3>Call Us</h3>
-              <p>+62 812-3456-7890</p>
+              <p>+62 896-5233-7277</p>
             </div>
           </div>
 

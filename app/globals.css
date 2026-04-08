@@ -124,7 +124,6 @@ body {
     text-decoration: none;
 }
 
-/* HERO SECTION */
 .hero {
     position: relative;
     width: 100%;
@@ -464,8 +463,6 @@ body {
     height: 100vh;
 }
 
-/* ================= LEFT SIDE ================= */
-
 .login-left {
     width: 55%;
     padding: 70px 80px;
@@ -537,8 +534,6 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* ================= RIGHT SIDE ================= */
-
 .login-right {
     width: 45%;
     position: relative;
@@ -547,9 +542,9 @@ body {
 
 .triangle {
     position: absolute;
-    width: auto;   /* sesuaikan dengan desain */
+    width: auto;
     height: auto;
-    right: -300px;  /* supaya hanya ujungnya terlihat */
+    right: -300px;
     top: -150px;
 }
 
