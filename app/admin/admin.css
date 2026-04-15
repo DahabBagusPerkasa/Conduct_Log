@@ -155,6 +155,56 @@
   overflow-y: auto;
 }
 
+.search-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+.loading-screen {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4B5563;
+  font-size: 18px;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.search-result {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.search-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.search-section {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.search-label {
+  font-size: 14px;
+  color: #6B7280;
+  margin-bottom: 10px;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: #9CA3AF;
+}
+
 .card {
   background: white;
   padding: 15px;
@@ -162,28 +212,73 @@
   margin-bottom: 10px;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-box {
+.input-container {
+  max-width: 500px;
   background: white;
-  padding: 30px;
-  border-radius: 15px;
+  padding: 20px;
+  border-radius: 12px;
 }
 
-.modal-actions {
+.input-container h2 {
+  margin-bottom: 18px;
+}
+
+.input-container button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #4c7cf3;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.input-container button:hover {
+  opacity: 0.95;
+}
+
+.notification-card {
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-2px);
+}
+
+.notification-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.notification-card p {
+  margin: 0 8px 0 0;
+  color: #4b5563;
+}
+
+.notification-card small {
+  color: #9ca3af;
+}
+
+.form-group {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.form-group select,
+.form-group input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 
 .btn-yes {
@@ -394,7 +489,7 @@
 
 .siswa-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
 }
 

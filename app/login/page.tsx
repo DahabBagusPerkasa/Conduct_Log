@@ -1,7 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -12,29 +11,59 @@ export default function LoginPage() {
 
   const router = useRouter();
 
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (data.user?.role === "admin") {
+          router.replace("/admin");
+        } else if (data.user?.role === "siswa") {
+          router.replace("/siswa");
+        }
+      } catch (error) {
+        // ignore and allow login
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
   const handleLogin = async () => {
     setErrorMsg("");
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("user")
-      .select("*")
-      .eq("nisnip", nisnip)
-      .eq("password", password)
-      .single();
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ nisnip, password }),
+      });
 
-    if (error || !data) {
-      setErrorMsg("NIS/NIP atau Password Salah");
+      const result = await response.json();
+      if (!response.ok || !result.user) {
+        setErrorMsg("NIS/NIP atau Password Salah");
+        setLoading(false);
+        return;
+      }
+
+      if (result.user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/siswa");
+      }
+    } catch (error) {
+      setErrorMsg("Terjadi kesalahan. Silakan coba lagi.");
       setLoading(false);
-      return;
-    }
-
-    localStorage.setItem("nisnip", data.nisnip);
-
-    if (data.role === "admin") {
-      router.replace("/admin");
-    } else {
-      router.replace("/siswa");
     }
   };
 

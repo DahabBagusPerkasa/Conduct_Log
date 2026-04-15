@@ -1,10 +1,16 @@
 "use client";
 
 import "./admin.css";
+import LoadingScreen from "../components/LoadingScreen";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useSiswa } from "@/hooks/useSiswa";
+import { useKasus } from "@/hooks/useKasus";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState("home");
   const [showSetting, setShowSetting] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -12,237 +18,68 @@ export default function AdminPage() {
   const [notifCount, setNotifCount] = useState(0);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [totalSiswa, setTotalSiswa] = useState(0);
-  const [sp1, setSp1] = useState(0);
-  const [sp2, setSp2] = useState(0);
-  const [tindakLanjut, setTindakLanjut] = useState(0);
-  const [dataSiswa, setDataSiswa] = useState<any[]>([]);
-  const [loadingSiswa, setLoadingSiswa] = useState(false);
-  const [dataKasus, setDataKasus] = useState<any[]>([]);
-  const [loadingKasus, setLoadingKasus] = useState(false);
-
-  // PAGINATION
-  const [page, setPage] = useState(0);
+  const [listSiswa, setListSiswa] = useState<any[]>([]);
+  const [listJenis, setListJenis] = useState<any[]>([]);
+  const [selectedSiswa, setSelectedSiswa] = useState("");
+  const [selectedJenis, setSelectedJenis] = useState("");
+  const [poin, setPoin] = useState(0);
+  const [bukti, setBukti] = useState("");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const limit = 20;
-  const [totalData, setTotalData] = useState(0);
 
-  // ================= FETCH SISWA =================
-  const fetchSiswa = async () => {
-    setLoadingSiswa(true);
+  const { dataSiswa, loadingSiswa, totalSiswaData, pageSiswa, setPageSiswa } =
+    useSiswa({ search, activeMenu, limit });
 
-    const from = page * limit;
-    const to = from + limit - 1;
+  const { dataKasus, loadingKasus, fetchKasus } =
+    useKasus({ search, activeMenu });
 
-    let query = supabase
-      .from("user")
-      .select("nama, nisnip, kelas, role", { count: "exact" });
-
-    if (search) {
-      query = query.or(`nama.ilike.%${search}%,nisnip.ilike.%${search}%`);
-    }
-
-    const { data, count } = await query.range(from, to);
-
-    setDataSiswa(data || []);
-    setTotalData(count || 0);
-    setLoadingSiswa(false);
-  };
-
-  // ================= FETCH KASUS =================
-  const fetchKasus = async () => {
-    setLoadingKasus(true);
-
-    const from = page * limit;
-    const to = from + limit - 1;
-
-    let query = supabase
-      .from("pelanggaran")
-      .select(`
-        nisnip,
-        poin,
-        user ( nama, kelas ),
-        jenis_pelanggaran ( nama )
-      `, { count: "exact" });
-
-    if (search) {
-      query = query.or(`nisnip.ilike.%${search}%`);
-    }
-
-    const { data, count, error } = await query.range(from, to);
-
-    if (error) console.error(error);
-
-    setDataKasus(data || []);
-    setTotalData(count || 0);
-    setLoadingKasus(false);
-  };
+  const { totalSiswa, sp1, sp2, tindakLanjut } = useDashboard();
 
   // ================= AUTH ==================
   useEffect(() => {
-    const nisnip = localStorage.getItem("nisnip");
+    const fetchSession = async () => {
+      const res = await fetch("/api/auth/session", {
+        method: "GET",
+        credentials: "include",
+      });
 
-    if (!nisnip) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const fetchUser = async () => {
-      const { data } = await supabase
-        .from("user")
-        .select("*")
-        .eq("nisnip", nisnip)
-        .single();
-
-      if (!data) {
+      if (!res.ok) {
         window.location.href = "/login";
         return;
       }
 
-      setUserData(data);
+      const data = await res.json();
+      if (!data.user || data.user.role !== "admin") {
+        window.location.href = "/login";
+        return;
+      }
+
+      setUserData(data.user);
       setLoading(false);
     };
 
-    fetchUser();
+    fetchSession();
   }, []);
 
   // ================= NOTIF =================
-  useEffect(() => {
-    const channel = supabase
-      .channel("pelanggaran-channel")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "pelanggaran",
-        },
-        () => {
-          setNotifCount((prev) => prev + 1);
-        }
-      )
-      .subscribe();
+  const fetchNotifCount = async () => {
+    const { count, error } = await supabase
+      .from("notifikasi")
+      .select("*", { count: "exact", head: true })
+      .eq("is_read", false)
+      .eq("target_role", "admin");
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    if (error) {
+      console.error("FETCH NOTIF COUNT ERROR:", error);
+      return;
+    }
 
-  // ================= DASHBOARD =================
-  const fetchDashboard = async () => {
-    const { count } = await supabase
-      .from("user")
-      .select("*", { count: "exact", head: true });
-
-    setTotalSiswa(count || 0);
-
-    const { data: pelanggaran } = await supabase
-      .from("pelanggaran")
-      .select("nisnip, poin");
-
-    if (!pelanggaran) return;
-
-    const mapPoin: any = {};
-
-    pelanggaran.forEach((item) => {
-      if (!mapPoin[item.nisnip]) {
-        mapPoin[item.nisnip] = 0;
-      }
-      mapPoin[item.nisnip] += item.poin;
-    });
-
-    let sp1Count = 0;
-    let sp2Count = 0;
-    let tindakCount = 0;
-
-    Object.values(mapPoin).forEach((total: any) => {
-      if (total >= 150) tindakCount++;
-      else if (total >= 100) sp2Count++;
-      else if (total >= 50) sp1Count++;
-    });
-
-    setSp1(sp1Count);
-    setSp2(sp2Count);
-    setTindakLanjut(tindakCount);
+    setNotifCount(count || 0);
   };
 
   useEffect(() => {
-    fetchDashboard();
-
-    const channel = supabase
-      .channel("dashboard-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "pelanggaran",
-        },
-        () => {
-          fetchDashboard();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    fetchNotifCount();
   }, []);
-
-  // ================= REALTIME SISWA =================
-  useEffect(() => {
-    if (activeMenu !== "siswa" && !search) return;
-
-    fetchSiswa();
-
-    const channel = supabase
-      .channel("siswa-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "user",
-        },
-        () => {
-          fetchSiswa();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [activeMenu, page, search]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [search]);
-
-  // ================= REALTIME KASUS =================
-  useEffect(() => {
-    if (activeMenu !== "kasus") return;
-
-    fetchKasus();
-
-    const channel = supabase
-      .channel("kasus-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "pelanggaran",
-        },
-        () => {
-          fetchKasus();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [activeMenu, page, search]);
 
   // ================= FORMAT ==================
   const formatName = (name: string) => {
@@ -260,7 +97,124 @@ export default function AdminPage() {
     return parts.map(p => p[0]).slice(0, 2).join(".");
   };
 
-  if (loading) return null;
+  const fetchDropdown = async () => {
+    const { data: siswa, error: siswaError } = await supabase
+      .from("user")
+      .select("id, nisnip, nama");
+
+    const { data: jenis, error: jenisError } = await supabase
+      .from("jenis_pelanggaran")
+      .select("id, nama, poin");
+
+    if (siswaError || jenisError) {
+      console.error("FETCH DROPDOWN ERROR:", siswaError || jenisError);
+      alert("Gagal memuat data input pelanggaran");
+      return;
+    }
+
+    console.log("LIST SISWA DROPDOWN", siswa);
+    setListSiswa(siswa || []);
+    setListJenis(jenis || []);
+  };
+
+  useEffect(() => {
+    if (activeMenu === "input") {
+      fetchDropdown();
+    }
+  }, [activeMenu]);
+
+  useEffect(() => {
+    const selected = listJenis.find((j) => j.id == selectedJenis);
+    if (selected) {
+      setPoin(selected.poin);
+    } else {
+      setPoin(0);
+    }
+  }, [selectedJenis, listJenis]);
+
+  const handleSubmit = async () => {
+    if (!selectedSiswa || !selectedJenis) {
+      alert("Lengkapi data dulu!");
+      return;
+    }
+
+    setLoadingSubmit(true);
+
+    try {
+      const { error: pelanggaranError } = await supabase.from("pelanggaran").insert({
+        user_id: selectedSiswa,
+        jenis_id: selectedJenis,
+        poin,
+        bukti,
+      });
+
+      if (pelanggaranError) {
+        console.error("INSERT PELANGGARAN ERROR:", pelanggaranError);
+        alert("Gagal menyimpan!");
+        return;
+      }
+
+      const { error: notifError } = await supabase.from("notifikasi").insert({
+        target_role: "admin",
+        message: "Pelanggaran baru ditambahkan",
+        is_read: false,
+      });
+
+      if (notifError) {
+        console.error("INSERT NOTIF ERROR:", notifError);
+        alert("Pelanggaran tersimpan, namun notifikasi gagal dibuat!");
+      } else {
+        await fetchNotifCount();
+      }
+
+      alert("Berhasil ditambahkan!");
+      setSelectedSiswa("");
+      setSelectedJenis("");
+      setPoin(0);
+      setBukti("");
+      fetchKasus();
+    } catch (error) {
+      console.error("SUBMIT ERROR:", error);
+      alert("Terjadi kesalahan, coba lagi!");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const SiswaCard = ({ item }: { item: any }) => (
+    <div className="siswa-card">
+      <div className="siswa-avatar">{getInitial(item.nama)}</div>
+      <div className="siswa-info">
+        <h3>
+          {item.nama}
+          {item.role === "admin" && (
+            <span className="badge-admin">Admin</span>
+          )}
+        </h3>
+        <p>NIS/NIP: {item.nisnip}</p>
+        <span className="kelas">{item.kelas}</span>
+      </div>
+    </div>
+  );
+
+  const KasusCard = ({ item }: { item: any }) => (
+    <div className="siswa-card">
+      <div className="siswa-avatar">{getInitial(item.user?.nama)}</div>
+      <div className="siswa-info">
+        <h3>{item.user?.nama || "Tidak diketahui"}</h3>
+        <p>NIS/NIP: {item.user?.nisnip}</p>
+        <span className="kelas">{item.user?.kelas}</span>
+        <p className="kasus-text">
+          Kasus: <b>{item.jenis_pelanggaran?.nama || "-"}</b>
+        </p>
+        <p className="poin-text">
+          Poin: <b>{item.poin}</b>
+        </p>
+      </div>
+    </div>
+  );
+
+  if (loading) return <LoadingScreen message="Loading dashboard..." fullPage />;
 
   return (
     <div className="admin-container">
@@ -328,7 +282,11 @@ export default function AdminPage() {
           />
 
           <div className="topbar-right">
-            <div className="notif-wrapper">
+            <div
+              className="notif-wrapper"
+              onClick={() => router.push("/admin/notifikasi")}
+              style={{ cursor: "pointer" }}
+            >
               <img src="/assets/img/notifikasi.png" className="icon" />
               {notifCount > 0 && (
                 <span className="notif-badge">{notifCount}</span>
@@ -357,46 +315,38 @@ export default function AdminPage() {
 
           {/* SEARCH RESULT (GLOBAL) */}
           {search ? (
-            <div className="siswa-container">
+            <>
+              <h1 className="search-title">"{search}"</h1>
+              <div className="search-result">
+                <div className="search-section">
+                  <p className="search-label">Siswa</p>
 
-              {loadingSiswa ? (
-                <p className="loading-text">Loading Data Siswa...</p>
-              ) : dataSiswa.length === 0 ? (
-                <div className="empty-state">
-                  <p>Data tidak ditemukan</p>
+                  {loadingSiswa ? (
+                    <p className="loading-text">Loading...</p>
+                  ) : dataSiswa.length === 0 ? (
+                    <p className="empty-text">Tidak ada data</p>
+                  ) : (
+                    dataSiswa.map((item, i) => (
+                      <SiswaCard key={item.nisnip || i} item={item} />
+                    ))
+                  )}
                 </div>
-              ) : (
-                dataSiswa.map((item, i) => (
-                  <div key={item.nisnip || i} className="siswa-card">
 
-                    <div className="siswa-avatar">
-                      {getInitial(item.nama)}
-                    </div>
+                <div className="search-section">
+                  <p className="search-label">Kasus</p>
 
-                    <div className="siswa-info">
-                      <h3>
-                        {item.nama}
-                        {item.role === "admin" && (
-                          <span className="badge-admin">Admin</span>
-                        )}
-                      </h3>
-                      <p>NIS/NIP: {item.nisnip}</p>
-                      <span className="kelas">{item.kelas}</span>
-                    </div>
-
-                  </div>
-                ))
-              )}
-
-              {totalData > 0 && (
-                <div className="pagination">
-                  <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
-                  <span>Page {page + 1} / {Math.ceil(totalData / limit)}</span>
-                  <button disabled={(page + 1) * limit >= totalData} onClick={() => setPage(p => p + 1)}>Next</button>
+                  {loadingKasus ? (
+                    <p className="loading-text">Loading...</p>
+                  ) : dataKasus.length === 0 ? (
+                    <p className="empty-text">Tidak ada data</p>
+                  ) : (
+                    dataKasus.map((item) => (
+                      <KasusCard key={item.id} item={item} />
+                    ))
+                  )}
                 </div>
-              )}
-
-            </div>
+              </div>
+            </>
           ) : (
             <>
               {activeMenu === "home" && (
@@ -450,31 +400,14 @@ export default function AdminPage() {
                 ) : (
                   <div className="siswa-container">
                     {dataSiswa.map((item, i) => (
-                      <div key={item.nisnip || i} className="siswa-card">
-
-                        <div className="siswa-avatar">
-                          {getInitial(item.nama)}
-                        </div>
-
-                        <div className="siswa-info">
-                          <h3>
-                            {item.nama}
-                            {item.role === "admin" && (
-                              <span className="badge-admin">Admin</span>
-                            )}
-                          </h3>
-                          <p>NIS/NIP: {item.nisnip}</p>
-                          <span className="kelas">{item.kelas}</span>
-                        </div>
-
-                      </div>
+                      <SiswaCard key={item.nisnip || i} item={item} />
                     ))}
 
-                    {totalData > 0 && (
+                    {totalSiswaData > 0 && (
                       <div className="pagination">
-                        <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
-                        <span>Page {page + 1} / {Math.ceil(totalData / limit)}</span>
-                        <button disabled={(page + 1) * limit >= totalData} onClick={() => setPage(p => p + 1)}>Next</button>
+                        <button disabled={pageSiswa === 0} onClick={() => setPageSiswa(p => p - 1)}>Prev</button>
+                        <span>Page {pageSiswa + 1} / {Math.ceil(totalSiswaData / limit)}</span>
+                        <button disabled={(pageSiswa + 1) * limit >= totalSiswaData} onClick={() => setPageSiswa(p => p + 1)}>Next</button>
                       </div>
                     )}
                   </div>
@@ -490,44 +423,65 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   <div className="siswa-container">
-                    {dataKasus.map((item, i) => (
-                      <div key={i} className="siswa-card">
-
-                        <div className="siswa-avatar">
-                          {getInitial(item.user?.nama)}
-                        </div>
-
-                        <div className="siswa-info">
-                          <h3>{item.user?.nama || "Tidak diketahui"}</h3>
-                          <p>NIS/NIP: {item.nisnip}</p>
-                          <span className="kelas">{item.user?.kelas}</span>
-
-                          <p className="kasus-text">
-                            Kasus: <b>{item.jenis_pelanggaran?.nama || "-"}</b>
-                          </p>
-
-                          <p className="poin-text">
-                            Poin: <b>{item.poin}</b>
-                          </p>
-                        </div>
-
-                      </div>
+                    {dataKasus.map((item) => (
+                      <KasusCard key={item.id} item={item} />
                     ))}
-
-                    {totalData > 0 && (
-                      <div className="pagination">
-                        <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
-                        <span>Page {page + 1} / {Math.ceil(totalData / limit)}</span>
-                        <button disabled={(page + 1) * limit >= totalData} onClick={() => setPage(p => p + 1)}>Next</button>
-                      </div>
-                    )}
                   </div>
                 )
               )}
 
               {activeMenu === "input" && (
-                <div className="placeholder">
-                  <h2>Input Pelanggaran Content</h2>
+                <div className="input-container">
+                  <h2>Input Pelanggaran</h2>
+
+                  <div className="form-group">
+                    <label>Siswa</label>
+                    <select
+                      value={selectedSiswa}
+                      onChange={(e) => setSelectedSiswa(e.target.value)}
+                    >
+                      <option value="">Pilih Siswa</option>
+                      {listSiswa.map((s) => (
+                        <option key={`${s.id}-${s.nisnip}`} value={s.id}>
+                          {s.nama} ({s.nisnip})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Jenis Pelanggaran</label>
+                    <select
+                      value={selectedJenis}
+                      onChange={(e) => setSelectedJenis(e.target.value)}
+                    >
+                      <option value="">Pilih Pelanggaran</option>
+                      {listJenis.map((j) => (
+                        <option key={`${j.id}-${j.nama}`} value={j.id}>
+                          {j.nama}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Poin</label>
+                    <input value={poin} disabled />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Bukti (opsional)</label>
+                    <input
+                      type="text"
+                      placeholder="Masukkan bukti atau keterangan"
+                      value={bukti}
+                      onChange={(e) => setBukti(e.target.value)}
+                    />
+                  </div>
+
+                  <button onClick={handleSubmit}>
+                    {loadingSubmit ? "Menyimpan..." : "Simpan"}
+                  </button>
                 </div>
               )}
             </>
@@ -564,8 +518,11 @@ export default function AdminPage() {
             <div className="modal-actions">
               <button
                 className="btn-yes"
-                onClick={() => {
-                  localStorage.removeItem("nisnip");
+                onClick={async () => {
+                  await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "include",
+                  });
                   window.location.href = "/";
                 }}
               >
