@@ -38,28 +38,34 @@ export default function AdminPage() {
   // ================= AUTH ==================
   useEffect(() => {
     const fetchSession = async () => {
-      const res = await fetch("/api/auth/session", {
-        method: "GET",
-        credentials: "include",
-      });
+      try {
+        const res = await fetch("/api/auth/session", {
+          method: "GET",
+          credentials: "include",
+        });
 
-      if (!res.ok) {
-        window.location.href = "/login";
-        return;
+        if (!res.ok) {
+          router.replace("/login");
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.user || data.user.role !== "admin") {
+          router.replace("/login");
+          return;
+        }
+
+        setUserData(data.user);
+      } catch (error) {
+        console.error("Admin session check error:", error);
+        router.replace("/login");
+      } finally {
+        setLoading(false);
       }
-
-      const data = await res.json();
-      if (!data.user || data.user.role !== "admin") {
-        window.location.href = "/login";
-        return;
-      }
-
-      setUserData(data.user);
-      setLoading(false);
     };
 
     fetchSession();
-  }, []);
+  }, [router]);
 
   // ================= NOTIF =================
   const fetchNotifCount = async () => {
@@ -303,7 +309,7 @@ export default function AdminPage() {
                   {formatName(userData?.nama)}
                 </span>
                 <span className="role">
-                  {userData?.role}
+                  {userData?.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : ''}
                 </span>
               </div>
             </div>
