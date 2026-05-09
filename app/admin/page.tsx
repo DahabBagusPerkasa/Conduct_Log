@@ -147,41 +147,53 @@ export default function AdminPage() {
     setLoadingSubmit(true);
 
     try {
-      const { error: pelanggaranError } = await supabase.from("pelanggaran").insert({
-        user_id: selectedSiswa,
-        jenis_id: selectedJenis,
-        poin,
-        bukti,
-      });
-
-      if (pelanggaranError) {
-        console.error("INSERT PELANGGARAN ERROR:", pelanggaranError);
-        alert("Gagal menyimpan!");
+      const student = listSiswa.find(s => s.id == selectedSiswa);
+      if (!student) {
+        alert("Siswa tidak ditemukan!");
         return;
       }
 
-      const { error: notifError } = await supabase.from("notifikasi").insert({
-        target_role: "admin",
-        message: "Pelanggaran baru ditambahkan",
-        is_read: false,
-      });
+      if (userData.role === "admin") {
+        // ✅ ADMIN langsung masuk pelanggaran
+        const { error } = await supabase.from("pelanggaran").insert({
+          user_id: selectedSiswa,
+          jenis_id: selectedJenis,
+          poin,
+          bukti,
+        });
 
-      if (notifError) {
-        console.error("INSERT NOTIF ERROR:", notifError);
-        alert("Pelanggaran tersimpan, namun notifikasi gagal dibuat!");
-      } else {
-        await fetchNotifCount();
+        if (error) throw error;
+
+      } else if (userData.role === "pembina") {
+        // 🟡 MASUK KE LAPORAN (pending)
+        const { data: laporanData, error: laporanError } = await supabase.from("laporan_pelanggaran").insert({
+          nisnip: student.nisnip,
+          jenis_id: selectedJenis,
+          poin,
+          pelapor_nisnip: userData.nisnip,
+        }).select().single();
+
+        if (laporanError) throw laporanError;
+
+        // 🔔 kirim notif ke admin
+        await supabase.from("notifikasi").insert({
+          target_role: "admin",
+          message: "Pelanggaran baru diantrian",
+          is_read: false,
+          laporan_id: laporanData.id,
+        });
       }
 
-      alert("Berhasil ditambahkan!");
+      alert("Berhasil!");
       setSelectedSiswa("");
       setSelectedJenis("");
       setPoin(0);
       setBukti("");
       fetchKasus();
-    } catch (error) {
-      console.error("SUBMIT ERROR:", error);
-      alert("Terjadi kesalahan, coba lagi!");
+
+    } catch (err) {
+      console.error(err);
+      alert("Gagal!");
     } finally {
       setLoadingSubmit(false);
     }

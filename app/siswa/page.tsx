@@ -26,6 +26,9 @@ export default function SiswaPage() {
   const [showSetting, setShowSetting] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
 
+  // ✅ PATCH: notif count
+  const [notifCount, setNotifCount] = useState(0);
+
   const [studentStatus, setStudentStatus] = useState<StudentStatus>({
     aktivitasTerakhir: "-",
     poinAnda: 0,
@@ -109,6 +112,38 @@ export default function SiswaPage() {
     checkSession();
   }, [router]);
 
+  // ================= NOTIF COUNT =================
+  // ✅ PATCH: hitung notif unread milik siswa ini
+  const fetchNotifCount = async () => {
+    if (!userData) return;
+
+    // Cari semua laporan yang nisnip-nya cocok dengan siswa ini
+    const { data: laporan } = await supabase
+      .from("laporan_pelanggaran")
+      .select("id")
+      .eq("nisnip", userData.nisnip);
+
+    const laporanIds = (laporan || []).map((l: any) => l.id);
+    if (laporanIds.length === 0) {
+      setNotifCount(0);
+      return;
+    }
+
+    const { count } = await supabase
+      .from("notifikasi")
+      .select("*", { count: "exact", head: true })
+      .eq("target_role", "siswa")
+      .eq("is_read", false)
+      .in("laporan_id", laporanIds);
+
+    setNotifCount(count || 0);
+  };
+
+  useEffect(() => {
+    if (userData) fetchNotifCount();
+  }, [userData]);
+
+  // ================= HELPERS =================
   const formatName = (name: string) => {
     if (!name) return "";
     const parts = name.split(" ");
@@ -209,10 +244,18 @@ export default function SiswaPage() {
             className="search-input"
           />
           <div className="topbar-right">
-            <div className="notif-wrapper">
+            {/* ✅ PATCH: notif wrapper dengan router + badge dinamis */}
+            <div
+              className="notif-wrapper"
+              onClick={() => router.push("/siswa/notifikasi")}
+              style={{ cursor: "pointer" }}
+            >
               <img src="/assets/img/notifikasi.png" className="icon" />
-              <span className="notif-badge">3</span>
+              {notifCount > 0 && (
+                <span className="notif-badge">{notifCount}</span>
+              )}
             </div>
+
             <div className="profile">
               <div className="avatar">{getInitial(userData?.nama)}</div>
               <div className="profile-text">
@@ -235,7 +278,6 @@ export default function SiswaPage() {
               </div>
 
               <div className="home-nav-cards">
-                {/* Card Status Anda */}
                 <div className="nav-card">
                   <div className="nav-card-icon">
                     <img src="/assets/img/status-siswa.png" alt="Status Anda" className="nav-card-img" />
@@ -249,7 +291,6 @@ export default function SiswaPage() {
                   </button>
                 </div>
 
-                {/* Card Poin Pelanggaran */}
                 <div className="nav-card">
                   <div className="nav-card-icon">
                     <img src="/assets/img/point-pelanggaran.png" alt="Poin Pelanggaran" className="nav-card-img" />
@@ -277,7 +318,6 @@ export default function SiswaPage() {
 
               <h2 className="page-title-center">Status Anda</h2>
 
-              {/* Info row 3 kolom */}
               <div className="info-row three-col">
                 <div className="info-card">
                   <span className="info-label">Aktivitas Terakhir</span>
@@ -302,7 +342,6 @@ export default function SiswaPage() {
                 </div>
               </div>
 
-              {/* Detail & Catatan 2 kolom */}
               <div className="detail-row two-col">
                 <div className="detail-col">
                   <h4 className="detail-col-title">Detail</h4>
@@ -340,7 +379,6 @@ export default function SiswaPage() {
 
               <h2 className="page-title-center">Poin Pelanggaran</h2>
 
-              {/* Summary 2 kolom: Poin Anda | Status */}
               <div className="info-row two-col-unequal">
                 <div className="info-card">
                   <span className="info-label">Poin Anda</span>
@@ -358,7 +396,6 @@ export default function SiswaPage() {
                 </div>
               </div>
 
-              {/* Catatan Kesiswaan card */}
               <div className="catatan-card">
                 <h4 className="catatan-title">Catatan Kesiswaan</h4>
                 <hr className="catatan-divider" />

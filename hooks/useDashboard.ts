@@ -10,7 +10,8 @@ export function useDashboard() {
   const fetchDashboard = useCallback(async () => {
     const { count } = await supabase
       .from("user")
-      .select("*", { count: "exact", head: true });
+      .select("*", { count: "exact", head: true })
+      .eq("role", "siswa");
 
     setTotalSiswa(count || 0);
 

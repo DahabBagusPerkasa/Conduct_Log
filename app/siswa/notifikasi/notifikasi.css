@@ -1,0 +1,135 @@
+.siswa-notif-page {
+  min-height: 100vh;
+  background-color: #e8f0fe;
+  padding: 36px 44px;
+  font-family: 'Inika', serif;
+  box-sizing: border-box;
+}
+
+/* ── Header ── */
+.siswa-notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.siswa-notif-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.siswa-notif-title h1 {
+  font-size: 34px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.siswa-notif-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  color: #374151;
+  font-family: 'Inika', serif;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.siswa-notif-back-btn:hover { opacity: 0.7; }
+.siswa-notif-back-btn span { font-size: 22px; line-height: 1; }
+
+/* ── Card wrapper ── */
+.siswa-notif-card-wrap {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 4px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Item ── */
+.siswa-notif-item {
+  padding: 22px 32px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 4px solid transparent;
+}
+.siswa-notif-item:hover { background: #f9fafb; }
+.siswa-notif-item--unread { border-left-color: #4C7CF3; }
+
+/* ── Item top row: judul + badge ── */
+.siswa-notif-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.siswa-notif-top-row h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* ── Badge ── */
+.badge-confirmed {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: #dcfce7;
+  color: #166534;
+  font-family: 'Inika', serif;
+}
+
+/* ── Info box (green) ── */
+.siswa-notif-info-box {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.siswa-notif-info-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.siswa-notif-poin {
+  color: #dc2626 !important;
+  font-weight: 700;
+}
+
+/* ── Timestamp ── */
+.siswa-notif-timestamp {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin: 12px 0 0 0;
+}
+
+/* ── Divider ── */
+.siswa-notif-divider {
+  border: none;
+  border-top: 1px solid #F1F5F9;
+  margin: 0 32px;
+}
+
+/* ── Empty / loading state ── */
+.siswa-notif-state {
+  padding: 40px 32px;
+  font-size: 15px;
+  color: #9CA3AF;
+  text-align: center;
+  margin: 0;
+}

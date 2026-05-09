@@ -24,6 +24,10 @@ export default function LoginPage() {
         const data = await res.json();
         if (data.user?.role === "admin") {
           router.replace("/admin");
+        } else if (data.user?.role === "walas") {
+          router.replace("/walas");
+        } else if (data.user?.role === "pembina") {
+          router.replace("/pembina");
         } else if (data.user?.role === "siswa") {
           router.replace("/siswa");
         }
@@ -58,6 +62,10 @@ export default function LoginPage() {
 
       if (result.user.role === "admin") {
         router.replace("/admin");
+      } else if (result.user.role === "walas") {
+        router.replace("/walas");
+      } else if (result.user.role === "pembina") {
+        router.replace("/pembina");
       } else {
         router.replace("/siswa");
       }

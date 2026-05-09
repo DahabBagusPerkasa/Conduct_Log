@@ -170,12 +170,6 @@
   font-size: 18px;
 }
 
-.search-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
 .search-result {
   display: flex;
   flex-direction: column;
@@ -240,34 +234,6 @@
   opacity: 0.95;
 }
 
-.notification-card {
-  background: white;
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.notification-card:hover {
-  transform: translateY(-2px);
-}
-
-.notification-card h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.notification-card p {
-  margin: 0 8px 0 0;
-  color: #4b5563;
-}
-
-.notification-card small {
-  color: #9ca3af;
-}
-
 .form-group {
   display: flex;
   flex-direction: column;
@@ -281,21 +247,11 @@
   border-radius: 8px;
 }
 
-.btn-yes {
-  background: red;
-  color: white;
-  padding: 10px;
-}
-
-.btn-no {
-  background: gray;
-  padding: 10px;
-}
-
 .abu-abu {
   color: #6B7280;
 }
 
+/* ── Modals ── */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -391,6 +347,7 @@
   }
 }
 
+/* ── Home ── */
 .home-container {
   display: flex;
   flex-direction: column;
@@ -427,6 +384,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  transition: 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
 }
 
 .icon-box {
@@ -443,21 +406,10 @@
   height: 28px;
 }
 
-.blue {
-  background: #dbeafe;
-}
-
-.yellow {
-  background: #fef3c7;
-}
-
-.red {
-  background: #fee2e2;
-}
-
-.orange {
-  background: #ffedd5;
-}
+.blue  { background: #dbeafe; }
+.yellow { background: #fef3c7; }
+.red   { background: #fee2e2; }
+.orange { background: #ffedd5; }
 
 .stat-card h2 {
   font-size: 32px;
@@ -469,15 +421,6 @@
   color: #555;
 }
 
-.stat-card {
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-  transition: 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-}
-
 .icon-text {
   font-size: 22px;
   font-weight: bold;
@@ -487,6 +430,7 @@
   color: #eab308;
 }
 
+/* ── Siswa / Kasus ── */
 .siswa-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -518,10 +462,13 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .siswa-info h3 {
   font-size: 15px;
+  display: flex;
+  align-items: center;
 }
 
 .siswa-info p {
@@ -547,6 +494,13 @@
   margin-left: 8px;
 }
 
+.kasus-text,
+.poin-text {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ── Pagination ── */
 .pagination {
   margin-top: 25px;
   display: flex;
@@ -574,12 +528,7 @@
   cursor: not-allowed;
 }
 
-.siswa-info h3 {
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-}
-
+/* ── Empty state ── */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -589,4 +538,10 @@
 .empty-state p {
   font-size: 18px;
   font-weight: 500;
+}
+
+.loading-text {
+  color: #6B7280;
+  font-size: 15px;
+  padding: 20px 0;
 }
