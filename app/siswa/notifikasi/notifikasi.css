@@ -133,3 +133,99 @@
   text-align: center;
   margin: 0;
 }
+
+@media screen and (max-width: 768px) {
+
+  .siswa-notif-page {
+    padding: 20px 14px 24px;
+  }
+
+  /* ── Header ── */
+  .siswa-notif-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .siswa-notif-title h1 {
+    font-size: 24px;
+  }
+
+  .siswa-notif-back-btn {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  /* ── Card wrap ── */
+  .siswa-notif-card-wrap {
+    border-radius: 14px;
+  }
+
+  /* ── Item ── */
+  .siswa-notif-item {
+    padding: 16px 16px 12px;
+    border-left: 3px solid transparent;
+  }
+
+  .siswa-notif-item--unread {
+    border-left-color: #4C7CF3;
+  }
+
+  /* ── Top row ── */
+  .siswa-notif-top-row {
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .siswa-notif-top-row h3 {
+    font-size: 14px;
+  }
+
+  /* ── Info box ── */
+  .siswa-notif-info-box {
+    padding: 12px 14px;
+    gap: 5px;
+  }
+
+  .siswa-notif-info-box p {
+    font-size: 13px;
+  }
+
+  /* ── Timestamp ── */
+  .siswa-notif-timestamp {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  /* ── Divider ── */
+  .siswa-notif-divider {
+    margin: 0 16px;
+  }
+
+  /* ── State ── */
+  .siswa-notif-state {
+    padding: 30px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .siswa-notif-page {
+    padding: 28px 30px;
+  }
+
+  .siswa-notif-title h1 {
+    font-size: 28px;
+  }
+
+  .siswa-notif-item {
+    padding: 18px 24px 14px;
+  }
+
+  .siswa-notif-divider {
+    margin: 0 24px;
+  }
+}

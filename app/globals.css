@@ -634,3 +634,336 @@ body {
     50%  { transform: translateX(-120px); }
     100% { transform: translateX(0); }
 }
+
+/* ========================================
+   MOBILE RESPONSIVE - Tambahkan di bagian
+   paling bawah file globals.css / styles.css
+   ======================================== */
+
+@media (max-width: 768px) {
+
+  /* ---- NAVBAR ---- */
+  .navbar {
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 12px;
+  }
+
+  .nav-left {
+    justify-content: center;
+  }
+
+  .logo-left,
+  .logo-right {
+    width: 44px;
+    height: 44px;
+  }
+
+  .logo-x {
+    font-size: 20px;
+  }
+
+  .nav-search input {
+    width: 90vw;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .nav-menu a {
+    font-size: 14px;
+  }
+
+  .nav-login-btn {
+    width: 120px;
+    height: 40px;
+    font-size: 15px;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    height: 260px;
+  }
+
+  .hero-title {
+    font-size: 18px;
+    padding: 0 15px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  /* ---- SAMBUTAN ---- */
+  .sambutan-section {
+    padding: 40px 20px;
+  }
+
+  .sambutan-title {
+    font-size: 22px;
+    gap: 12px;
+  }
+
+  .sambutan-title .line {
+    width: 60px;
+  }
+
+  .sambutan-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 25px 20px;
+    gap: 20px;
+  }
+
+  .sambutan-image img {
+    width: 180px;
+  }
+
+  .sambutan-content h3 {
+    font-size: 18px;
+  }
+
+  .sambutan-content p {
+    font-size: 14px;
+  }
+
+  /* ---- ABOUT HEADER ---- */
+  .about-header {
+    height: 110px;
+    border-bottom-left-radius: 50% 20px;
+    border-bottom-right-radius: 50% 20px;
+  }
+
+  .about-title {
+    font-size: 24px;
+    gap: 12px;
+  }
+
+  .about-line {
+    width: 60px;
+  }
+
+  .about-desc {
+    font-size: 14px;
+    padding: 0 20px;
+    margin: 20px auto 35px auto;
+  }
+
+  /* ---- ABOUT CARDS ---- */
+  .about-section {
+    padding: 20px 16px;
+  }
+
+  .about-card {
+    flex-direction: column !important;
+    align-items: center;
+    text-align: center;
+    padding: 25px 20px;
+    gap: 20px;
+  }
+
+  /* Balik urutan jurusan card supaya logo di atas */
+  .jurusan-card {
+    flex-direction: column-reverse !important;
+  }
+
+  .about-logo img {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* Banner — reset posisi absolute menjadi normal flow */
+  .tim-card .banner-wrapper,
+  .sekolah-card .banner-wrapper,
+  .jurusan-card .banner-wrapper {
+    position: static;
+    margin-bottom: 10px;
+  }
+
+  .banner-img {
+    width: 170px;
+  }
+
+  .about-text {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  .about-list {
+    font-size: 14px;
+    text-align: left;
+    display: inline-block;
+  }
+
+  /* ---- CONTACT ---- */
+  .contact-section {
+    padding: 50px 0 70px 0;
+  }
+
+  .contact-title {
+    font-size: 22px;
+    gap: 12px;
+  }
+
+  .contact-line {
+    width: 60px;
+  }
+
+  .contact-container {
+    width: 92%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .contact-card {
+    min-width: unset;
+    padding: 18px 20px;
+    gap: 14px;
+  }
+
+  .contact-card h3 {
+    font-size: 16px;
+  }
+
+  .contact-card p {
+    font-size: 14px;
+  }
+
+  .contact-icon img {
+    width: 22px;
+  }
+
+  .instagram-list a {
+    font-size: 14px;
+  }
+
+  /* ---- LOGIN PAGE ---- */
+  .login-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .login-left {
+    width: 100%;
+    padding: 40px 28px;
+  }
+
+  .logo-area {
+    margin-bottom: 40px;
+    gap: 14px;
+  }
+
+  .logo-area img {
+    width: 65px;
+  }
+
+  .logo-text h1 {
+    font-size: 26px;
+  }
+
+  .logo-text p {
+    font-size: 16px;
+  }
+
+  .login-form {
+    width: 100%;
+  }
+
+  .login-form label {
+    font-size: 20px;
+    margin-top: 22px;
+    margin-bottom: 10px;
+  }
+
+  .login-form input {
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+
+  .login-page-btn {
+    margin-top: 40px;
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+
+  .login-right {
+    display: none; /* Sembunyikan panel segitiga animasi di HP */
+  }
+}
+
+/* Tablet (768px – 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .navbar {
+    padding: 0 30px;
+  }
+
+  .nav-search input {
+    width: 180px;
+  }
+
+  .nav-menu {
+    gap: 20px;
+  }
+
+  .sambutan-section {
+    padding: 50px 40px;
+  }
+
+  .sambutan-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .sambutan-image img {
+    width: 220px;
+  }
+
+  .about-section {
+    padding: 30px 40px;
+  }
+
+  .about-card {
+    gap: 30px;
+    padding: 30px;
+  }
+
+  .tim-card .banner-wrapper,
+  .sekolah-card .banner-wrapper {
+    right: auto;
+    position: static;
+  }
+
+  .jurusan-card .banner-wrapper {
+    right: 80px;
+    top: 40px;
+  }
+
+  .contact-container {
+    width: 92%;
+    gap: 18px;
+  }
+
+  .login-left {
+    width: 60%;
+    padding: 50px 50px;
+  }
+
+  .login-right {
+    width: 40%;
+  }
+}

@@ -10,11 +10,36 @@ export default function AdminNotifikasiPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // State untuk modal penolakan
+  // State modal penolakan
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectTarget, setRejectTarget] = useState<any>(null); // item notif yg akan ditolak
+  const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [alasanPenolakan, setAlasanPenolakan] = useState("");
   const [loadingReject, setLoadingReject] = useState(false);
+
+  // State popup feedback (pengganti alert)
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState<"success" | "error">("success");
+  const [popupCallback, setPopupCallback] = useState<null | (() => void)>(null);
+
+  const showFeedback = (
+    type: "success" | "error",
+    message: string,
+    callback?: () => void
+  ) => {
+    setPopupType(type);
+    setPopupMessage(message);
+    setPopupCallback(callback ? () => callback : null);
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    if (popupCallback) {
+      popupCallback();
+      setPopupCallback(null);
+    }
+  };
 
   // ─── Fetch semua notifikasi ───────────────────────────────────────────────
   const fetchNotifList = async () => {
@@ -95,7 +120,7 @@ export default function AdminNotifikasiPage() {
       .single();
 
     if (userError || !user) {
-      alert("Siswa tidak ditemukan!");
+      showFeedback("error", "Siswa tidak ditemukan!");
       return;
     }
 
@@ -110,7 +135,7 @@ export default function AdminNotifikasiPage() {
 
     if (insertError) {
       console.error(insertError);
-      alert("Gagal menerima laporan!");
+      showFeedback("error", "Gagal menerima laporan!");
       return;
     }
 
@@ -123,11 +148,12 @@ export default function AdminNotifikasiPage() {
     // 4. Notif ke SISWA yang bersangkutan
     await supabase.from("notifikasi").insert({
       target_role: "siswa",
+      target_nisnip: laporan.nisnip,
       tipe: "accepted",
       message: `Pelanggaran Anda (${item.deskripsi}) telah dikonfirmasi. Poin: ${laporan.poin}`,
       is_read: false,
       laporan_id: laporan.id,
-      sender_nisnip: null, // dari sistem/admin
+      sender_nisnip: null,
     });
 
     // 5. Notif ke PEMBINA bahwa laporannya diterima
@@ -146,8 +172,7 @@ export default function AdminNotifikasiPage() {
       .update({ is_read: true })
       .eq("id", item.id);
 
-    alert("Laporan diterima!");
-    fetchNotifList();
+    showFeedback("success", "Laporan berhasil diterima!", fetchNotifList);
   };
 
   // ─── Buka modal reject ────────────────────────────────────────────────────
@@ -160,7 +185,7 @@ export default function AdminNotifikasiPage() {
   // ─── Confirm reject ───────────────────────────────────────────────────────
   const confirmReject = async () => {
     if (!alasanPenolakan.trim()) {
-      alert("Harap isi alasan penolakan!");
+      showFeedback("error", "Harap isi alasan penolakan!");
       return;
     }
 
@@ -199,11 +224,15 @@ export default function AdminNotifikasiPage() {
       setShowRejectModal(false);
       setRejectTarget(null);
       setAlasanPenolakan("");
-      alert("Laporan ditolak & alasan telah dikirim ke Pembina.");
-      fetchNotifList();
+
+      showFeedback(
+        "success",
+        "Laporan ditolak & alasan telah dikirim ke Pembina.",
+        fetchNotifList
+      );
     } catch (err) {
       console.error(err);
-      alert("Gagal menolak laporan!");
+      showFeedback("error", "Gagal menolak laporan!");
     } finally {
       setLoadingReject(false);
     }
@@ -384,6 +413,34 @@ export default function AdminNotifikasiPage() {
               </button>
               <button className="btn-no" onClick={() => setShowRejectModal(false)}>
                 Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL POPUP FEEDBACK (pengganti alert) ── */}
+      {showPopup && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <div className="modal-header">
+              <h2>{popupType === "success" ? "Berhasil" : "Gagal"}</h2>
+              <span className="close-btn" onClick={handleClosePopup}>×</span>
+            </div>
+            <div className="modal-body">
+              <p>{popupMessage}</p>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn-yes"
+                style={
+                  popupType === "success"
+                    ? { background: "linear-gradient(90deg,#4C7CF3,#5C3ECF)" }
+                    : { background: "linear-gradient(90deg,#ff4d4d,#e60023)" }
+                }
+                onClick={handleClosePopup}
+              >
+                Tutup
               </button>
             </div>
           </div>

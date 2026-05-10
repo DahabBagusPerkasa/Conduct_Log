@@ -40,14 +40,14 @@ export default function SiswaNotifikasiPage() {
         .from("notifikasi")
         .select("*")
         .eq("target_role", "siswa")
+        .eq("target_nisnip", userData.nisnip)
         .order("created_at", { ascending: false });
 
       if (error) { setNotifikasi([]); return; }
 
-      // Enrich + filter hanya notif milik siswa ini
       const enriched = await Promise.all(
         (data || []).map(async (item) => {
-          if (!item.laporan_id) return null;
+          if (!item.laporan_id) return item;
 
           const { data: laporan } = await supabase
             .from("laporan_pelanggaran")
@@ -55,10 +55,7 @@ export default function SiswaNotifikasiPage() {
             .eq("id", item.laporan_id)
             .single();
 
-          if (!laporan) return null;
-
-          // Filter: hanya tampilkan jika laporan ini milik siswa yg login
-          if (laporan.nisnip !== userData.nisnip) return null;
+          if (!laporan) return item;
 
           return {
             ...item,

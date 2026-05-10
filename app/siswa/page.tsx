@@ -3,6 +3,7 @@
 import "./siswa.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldCheck, ShieldAlert, ShieldX } from "lucide-react";
 import LoadingScreen from "../components/LoadingScreen";
 import { supabase } from "@/lib/supabase";
 
@@ -113,28 +114,15 @@ export default function SiswaPage() {
   }, [router]);
 
   // ================= NOTIF COUNT =================
-  // ✅ PATCH: hitung notif unread milik siswa ini
   const fetchNotifCount = async () => {
     if (!userData) return;
-
-    // Cari semua laporan yang nisnip-nya cocok dengan siswa ini
-    const { data: laporan } = await supabase
-      .from("laporan_pelanggaran")
-      .select("id")
-      .eq("nisnip", userData.nisnip);
-
-    const laporanIds = (laporan || []).map((l: any) => l.id);
-    if (laporanIds.length === 0) {
-      setNotifCount(0);
-      return;
-    }
 
     const { count } = await supabase
       .from("notifikasi")
       .select("*", { count: "exact", head: true })
-      .eq("target_role", "siswa")
       .eq("is_read", false)
-      .in("laporan_id", laporanIds);
+      .eq("target_role", "siswa")
+      .eq("target_nisnip", userData.nisnip);
 
     setNotifCount(count || 0);
   };
@@ -177,6 +165,12 @@ export default function SiswaPage() {
       : studentStatus.status === "Perhatian"
       ? "status-perhatian"
       : "status-berbahaya";
+
+  const ShieldIcon = ({ status }: { status: StudentStatus["status"] }) => {
+    if (status === "Aman") return <ShieldCheck size={40} color="#22c55e" />;
+    if (status === "Perhatian") return <ShieldAlert size={40} color="#eab308" />;
+    return <ShieldX size={40} color="#ef4444" />;
+  };
 
   if (loading || !userData) {
     return <LoadingScreen message="Loading dashboard..." fullPage />;
@@ -238,11 +232,6 @@ export default function SiswaPage() {
 
         {/* TOPBAR */}
         <div className="topbar">
-          <input
-            type="text"
-            placeholder="Cari siswa, pelanggaran..."
-            className="search-input"
-          />
           <div className="topbar-right">
             {/* ✅ PATCH: notif wrapper dengan router + badge dinamis */}
             <div
@@ -330,7 +319,7 @@ export default function SiswaPage() {
                   <span className="info-label">Poin Anda</span>
                   <div className="poin-with-shield">
                     <span className="poin-big">{studentStatus.poinAnda}</span>
-                    <img src="/assets/img/aman.png" alt="shield" className="shield-icon" />
+                    <ShieldIcon status={studentStatus.status} />
                   </div>
                 </div>
 
@@ -384,7 +373,7 @@ export default function SiswaPage() {
                   <span className="info-label">Poin Anda</span>
                   <div className="poin-with-shield">
                     <span className="poin-big">{studentStatus.poinAnda}</span>
-                    <img src="/assets/img/aman.png" alt="shield" className="shield-icon" />
+                    <ShieldIcon status={studentStatus.status} />
                   </div>
                 </div>
 

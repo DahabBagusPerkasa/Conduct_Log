@@ -350,6 +350,24 @@ export default function PembinaPage() {
 
       if (laporanError) throw laporanError;
 
+      const { data: siswaDetail } = await supabase
+        .from("user")
+        .select("nama, nisnip, kelas, perwalian")
+        .eq("id", selectedSiswa)
+        .single();
+
+      if (siswaDetail?.perwalian) {
+        await supabase.from("notifikasi").insert({
+          target_role: "walas",
+          target_nisnip: siswaDetail.perwalian,
+          tipe: "pelanggaran",
+          message: `Siswa perwalian kamu (${siswaDetail.nama} · ${siswaDetail.kelas}) mendapat pelanggaran: ${selectedJenisData?.nama} sebesar ${poin} poin.`,
+          is_read: false,
+          sender_nisnip: userData?.nisnip ?? null,
+          laporan_id: laporanData.id,
+        });
+      }
+
       // Kirim notifikasi ke admin
       await supabase.from("notifikasi").insert({
         target_role: "admin",
@@ -465,13 +483,6 @@ export default function PembinaPage() {
 
         {/* TOPBAR */}
         <div className="topbar">
-          <input
-            type="text"
-            placeholder="Cari siswa, pelanggaran..."
-            className="search-input"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
           <div className="topbar-right">
             <div
               className="notif-wrapper"

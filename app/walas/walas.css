@@ -621,7 +621,12 @@
   }
 }
 
-/* ================= MOBILE RESPONSIVE ================= */
+/* ========================================
+   FIX MOBILE — Walas
+   Ganti bagian @media (max-width: 768px)
+   yang sudah ada di walas.css dengan ini
+   ======================================== */
+
 @media screen and (max-width: 768px) {
 
   /* ===== MAIN LAYOUT ===== */
@@ -654,29 +659,47 @@
     padding: 10px 14px;
     font-size: 14px;
     white-space: nowrap;
+    flex-direction: row;
   }
 
+  /* FIX: Setting & Logout kanan-kiri, tidak numpuk */
   .sidebar-bottom {
-    margin-top: 20px;
+    margin-top: 15px;
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar-bottom .menu-item {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
   }
 
   /* ===== TOPBAR ===== */
   .topbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 15px;
     height: auto;
     padding: 15px;
+    gap: 15px;
+    justify-content: flex-start;
   }
 
   .search-input {
     width: 100%;
+    font-size: 13px;
   }
 
+  /* FIX: notif & profil tidak jauh, hapus justify space-between */
   .topbar-right {
-    justify-content: space-between;
+    margin-left: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
   }
 
   .profile-text .name {
@@ -719,6 +742,10 @@
     font-size: 26px;
   }
 
+  .stat-card p {
+    font-size: 13px;
+  }
+
   /* ===== HOME NAV ===== */
   .home-nav-cards {
     grid-template-columns: 1fr;
@@ -739,7 +766,7 @@
   }
 
   .nav-card-btn {
-    padding: 10px;
+    padding: 11px;
     font-size: 14px;
   }
 
@@ -754,7 +781,7 @@
     text-align: center;
   }
 
-  /* ===== SISWA ===== */
+  /* ===== SISWA CARDS ===== */
   .siswa-container {
     grid-template-columns: 1fr;
   }
@@ -774,8 +801,14 @@
     font-size: 14px;
   }
 
-  .siswa-info p {
+  .siswa-info p,
+  .kasus-text,
+  .poin-text {
     font-size: 12px;
+  }
+
+  .tanggal-text {
+    font-size: 11px;
   }
 
   /* ===== PAGINATION ===== */
@@ -791,6 +824,15 @@
   .pagination button {
     padding: 7px 12px;
     font-size: 13px;
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    padding: 40px 20px;
+  }
+
+  .empty-state p {
+    font-size: 16px;
   }
 
   /* ===== MODAL ===== */
@@ -809,11 +851,13 @@
 
   .modal-actions {
     flex-direction: column;
+    gap: 8px;
   }
 
   .btn-yes,
   .btn-no {
     width: 100%;
+    text-align: center;
   }
 
   /* ===== FOOTER ===== */
@@ -822,7 +866,8 @@
     margin-top: 20px;
   }
 }
-/* HP KECIL */
+
+/* ===== HP KECIL ===== */
 @media screen and (max-width: 480px) {
 
   .logo-box h3 {

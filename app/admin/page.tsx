@@ -20,11 +20,16 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [listSiswa, setListSiswa] = useState<any[]>([]);
   const [listJenis, setListJenis] = useState<any[]>([]);
-  const [selectedSiswa, setSelectedSiswa] = useState("");
-  const [selectedJenis, setSelectedJenis] = useState("");
   const [poin, setPoin] = useState(0);
-  const [bukti, setBukti] = useState("");
+  const [inputSearch, setInputSearch] = useState("");
+  const [selectedSiswaId, setSelectedSiswaId] = useState<any>(null);
+  const [selectedJenisId, setSelectedJenisId] = useState<any>(null);
+  const [keterangan, setKeterangan] = useState("");
+  const [buktiFiles, setBuktiFiles] = useState<File[]>([]);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState<"success" | "error">("success");
   const limit = 20;
 
   const { dataSiswa, loadingSiswa, totalSiswaData, pageSiswa, setPageSiswa } =
@@ -104,96 +109,153 @@ export default function AdminPage() {
   };
 
   const fetchDropdown = async () => {
-    const { data: siswa, error: siswaError } = await supabase
-      .from("user")
-      .select("id, nisnip, nama");
+    let allSiswa: any[] = [];
+    let from = 0;
+    const batchSize = 1000;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from("user")
+        .select("id, nisnip, nama, kelas")
+        .eq("role", "siswa")
+        .order("nama", { ascending: true })
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error("FETCH SISWA ERROR:", error);
+        break;
+      }
+
+      if (!data || data.length === 0) break;
+
+      allSiswa = [...allSiswa, ...data];
+
+      if (data.length < batchSize) break;
+      from += batchSize;
+    }
 
     const { data: jenis, error: jenisError } = await supabase
       .from("jenis_pelanggaran")
       .select("id, nama, poin");
 
-    if (siswaError || jenisError) {
-      console.error("FETCH DROPDOWN ERROR:", siswaError || jenisError);
-      alert("Gagal memuat data input pelanggaran");
+    if (jenisError) {
+      console.error("FETCH JENIS ERROR:", jenisError);
       return;
     }
 
-    console.log("LIST SISWA DROPDOWN", siswa);
-    setListSiswa(siswa || []);
+    setListSiswa(allSiswa);
     setListJenis(jenis || []);
   };
 
   useEffect(() => {
     if (activeMenu === "input") {
       fetchDropdown();
+      setInputSearch("");
+      setSelectedSiswaId(null);
+      setSelectedJenisId(null);
+      setPoin(0);
+      setKeterangan("");
+      setBuktiFiles([]);
     }
   }, [activeMenu]);
 
   useEffect(() => {
-    const selected = listJenis.find((j) => j.id == selectedJenis);
-    if (selected) {
-      setPoin(selected.poin);
-    } else {
-      setPoin(0);
-    }
-  }, [selectedJenis, listJenis]);
+    const selected = listJenis.find((j) => j.id === selectedJenisId);
+    setPoin(selected ? selected.poin : 0);
+  }, [selectedJenisId, listJenis]);
 
   const handleSubmit = async () => {
-    if (!selectedSiswa || !selectedJenis) {
-      alert("Lengkapi data dulu!");
+    if (!selectedSiswaId || !selectedJenisId) {
+      setPopupType("error");
+      setPopupMessage("Pilih siswa dan jenis pelanggaran!");
+      setShowPopup(true);
       return;
     }
 
     setLoadingSubmit(true);
 
     try {
-      const student = listSiswa.find(s => s.id == selectedSiswa);
-      if (!student) {
-        alert("Siswa tidak ditemukan!");
-        return;
+      let buktiUrls: string[] = [];
+
+      for (const file of buktiFiles) {
+        const filename = `${Date.now()}_${file.name}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("bukti-pelanggaran")
+          .upload(filename, file);
+
+        if (uploadErr) {
+          console.error("UPLOAD ERROR:", uploadErr);
+          setPopupType("error");
+          setPopupMessage(`Upload gagal: ${uploadErr.message}`);
+          setShowPopup(true);
+          continue;
+        }
+
+        const { data } = supabase.storage
+          .from("bukti-pelanggaran")
+          .getPublicUrl(filename);
+
+        buktiUrls.push(data.publicUrl);
       }
 
-      if (userData.role === "admin") {
-        // ✅ ADMIN langsung masuk pelanggaran
-        const { error } = await supabase.from("pelanggaran").insert({
-          user_id: selectedSiswa,
-          jenis_id: selectedJenis,
+      const { data: pelanggaranData, error } = await supabase
+        .from("pelanggaran")
+        .insert({
+          user_id: selectedSiswaId,
+          jenis_id: selectedJenisId,
           poin,
-          bukti,
-        });
+          keterangan: keterangan || null,
+          bukti: buktiUrls.length > 0 ? buktiUrls.join(",") : null,
+        })
+        .select()
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-      } else if (userData.role === "pembina") {
-        // 🟡 MASUK KE LAPORAN (pending)
-        const { data: laporanData, error: laporanError } = await supabase.from("laporan_pelanggaran").insert({
-          nisnip: student.nisnip,
-          jenis_id: selectedJenis,
-          poin,
-          pelapor_nisnip: userData.nisnip,
-        }).select().single();
+      const { data: siswaData } = await supabase
+        .from("user")
+        .select("nama, nisnip, kelas, perwalian")
+        .eq("id", selectedSiswaId)
+        .single();
 
-        if (laporanError) throw laporanError;
-
-        // 🔔 kirim notif ke admin
+      if (siswaData?.perwalian) {
         await supabase.from("notifikasi").insert({
-          target_role: "admin",
-          message: "Pelanggaran baru diantrian",
+          target_role: "walas",
+          target_nisnip: siswaData.perwalian,
+          tipe: "pelanggaran",
+          message: `Siswa perwalian kamu (${siswaData.nama} · ${siswaData.kelas}) mendapat pelanggaran: ${selectedJenisData?.nama} sebesar ${poin} poin.`,
           is_read: false,
-          laporan_id: laporanData.id,
+          sender_nisnip: userData?.nisnip ?? null,
+          laporan_id: null,
         });
       }
 
-      alert("Berhasil!");
-      setSelectedSiswa("");
-      setSelectedJenis("");
+      await supabase.from("notifikasi").insert({
+        target_role: "siswa",
+        target_nisnip: selectedSiswaData?.nisnip,
+        message: `Kamu mendapat pelanggaran: ${selectedJenisData?.nama} (${poin} poin)`,
+        is_read: false,
+        tipe: "pelanggaran",
+        sender_nisnip: userData?.nisnip,
+      });
+
+      setPopupType("success");
+      setPopupMessage("Pelanggaran berhasil disimpan!");
+      setShowPopup(true);
+
+      setSelectedSiswaId(null);
+      setSelectedJenisId(null);
       setPoin(0);
-      setBukti("");
+      setKeterangan("");
+      setBuktiFiles([]);
+      setInputSearch("");
       fetchKasus();
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Gagal!");
+      setPopupType("error");
+      setPopupMessage(err?.message || "Terjadi kesalahan saat menyimpan data");
+      setShowPopup(true);
     } finally {
       setLoadingSubmit(false);
     }
@@ -231,6 +293,13 @@ export default function AdminPage() {
       </div>
     </div>
   );
+
+  const filteredInputSiswa = listSiswa.filter(s =>
+    s.nama.toLowerCase().includes(inputSearch.toLowerCase()) ||
+    String(s.nisnip).includes(inputSearch)
+  );
+  const selectedSiswaData = listSiswa.find(s => s.id === selectedSiswaId);
+  const selectedJenisData = listJenis.find(j => j.id === selectedJenisId);
 
   if (loading) return <LoadingScreen message="Loading dashboard..." fullPage />;
 
@@ -449,59 +518,153 @@ export default function AdminPage() {
               )}
 
               {activeMenu === "input" && (
-                <div className="input-container">
-                  <h2>Input Pelanggaran</h2>
+  <div className="ip-fullpage">
 
-                  <div className="form-group">
-                    <label>Siswa</label>
-                    <select
-                      value={selectedSiswa}
-                      onChange={(e) => setSelectedSiswa(e.target.value)}
-                    >
-                      <option value="">Pilih Siswa</option>
-                      {listSiswa.map((s) => (
-                        <option key={`${s.id}-${s.nisnip}`} value={s.id}>
-                          {s.nama} ({s.nisnip})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+    {/* PANEL KIRI */}
+    <div className="ip-left-panel">
+      <div className="ip-panel-header">
+        <h2>Pilih Siswa</h2>
+        <p className="abu-abu">Semua Jurusan</p>
+        <div className="ip-search-wrap">
+          <input
+            type="text"
+            placeholder="Cari nama atau NIS..."
+            value={inputSearch}
+            onChange={(e) => setInputSearch(e.target.value)}
+            className="ip-search-input"
+          />
+        </div>
+      </div>
 
-                  <div className="form-group">
-                    <label>Jenis Pelanggaran</label>
-                    <select
-                      value={selectedJenis}
-                      onChange={(e) => setSelectedJenis(e.target.value)}
-                    >
-                      <option value="">Pilih Pelanggaran</option>
-                      {listJenis.map((j) => (
-                        <option key={`${j.id}-${j.nama}`} value={j.id}>
-                          {j.nama}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+      <div className="ip-siswa-list">
+        {filteredInputSiswa.length === 0 ? (
+          <div className="empty-state" style={{ padding: "30px 10px" }}>
+            <p style={{ fontSize: 14 }}>Siswa tidak ditemukan</p>
+          </div>
+        ) : filteredInputSiswa.map(s => (
+          <div
+            key={s.id}
+            className={`ip-siswa-item ${selectedSiswaId === s.id ? "ip-siswa-selected" : ""}`}
+            onClick={() => setSelectedSiswaId(s.id)}
+          >
+            <div className="ip-s-ava">{getInitial(s.nama)}</div>
+            <div className="ip-s-info">
+              <div className="ip-s-name">{s.nama}</div>
+              <div className="ip-s-meta">{s.nisnip}</div>
+            </div>
+            <span className="ip-s-kelas">{s.kelas}</span>
+          </div>
+        ))}
+      </div>
+    </div>
 
-                  <div className="form-group">
-                    <label>Poin</label>
-                    <input value={poin} disabled />
-                  </div>
+    {/* PANEL KANAN */}
+    <div className="ip-right-panel">
+      <div className="ip-right-scroll">
 
-                  <div className="form-group">
-                    <label>Bukti (opsional)</label>
-                    <input
-                      type="text"
-                      placeholder="Masukkan bukti atau keterangan"
-                      value={bukti}
-                      onChange={(e) => setBukti(e.target.value)}
-                    />
-                  </div>
+        {selectedSiswaData ? (
+          <div className="ip-sel-badge">
+            <div className="ip-sel-ava">{getInitial(selectedSiswaData.nama)}</div>
+            <div>
+              <h3>{selectedSiswaData.nama}</h3>
+              <p className="abu-abu">{selectedSiswaData.nisnip} · {selectedSiswaData.kelas}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="ip-placeholder">
+            Pilih siswa untuk mulai input pelanggaran
+          </div>
+        )}
 
-                  <button onClick={handleSubmit}>
-                    {loadingSubmit ? "Menyimpan..." : "Simpan"}
-                  </button>
+        <div className="ip-section-card">
+          <div className="ip-section-label">Jenis Pelanggaran</div>
+          <div className="ip-jenis-grid">
+            {listJenis.map(j => (
+              <button
+                key={j.id}
+                className={`ip-jenis-btn ${selectedJenisId === j.id ? "ip-jenis-active" : ""}`}
+                onClick={() => setSelectedJenisId(j.id)}
+              >
+                <div className="ip-jb-name">{j.nama}</div>
+                <div className="ip-jb-poin">{j.poin} poin</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {poin > 0 && (
+          <div className="ip-section-card">
+            <div className="ip-section-label">Total Poin</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <div className="ip-poin-num">{poin}</div>
+              <div className="abu-abu" style={{ fontSize: 13 }}>poin pelanggaran</div>
+            </div>
+          </div>
+        )}
+
+        <div className="ip-section-card">
+          <div className="ip-section-label">Keterangan</div>
+          <textarea
+            className="ip-textarea"
+            placeholder="Tuliskan keterangan detail kejadian pelanggaran..."
+            value={keterangan}
+            onChange={(e) => setKeterangan(e.target.value)}
+            rows={3}
+          />
+        </div>
+
+        <div className="ip-section-card">
+          <div className="ip-section-label">Bukti Foto</div>
+          <label className="ip-bukti-area">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                setBuktiFiles(prev => [...prev, ...files].slice(0, 5));
+                e.target.value = "";
+              }}
+            />
+            <div className="ip-bukti-icon">📷</div>
+            <div className="ip-bukti-text">Tap untuk ambil foto / pilih dari galeri</div>
+            <div className="ip-bukti-sub">PNG, JPG, HEIC · Maks 5 file</div>
+          </label>
+
+          {buktiFiles.length > 0 && (
+            <div className="ip-preview-wrap">
+              {buktiFiles.map((f, i) => (
+                <div key={i} className="ip-preview-del">
+                  <img src={URL.createObjectURL(f)} className="ip-preview-img" alt={`bukti-${i}`} />
+                  <button onClick={() => setBuktiFiles(prev => prev.filter((_, idx) => idx !== i))}>×</button>
                 </div>
-              )}
+              ))}
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      <div className="ip-bottom-bar">
+        <div className="ip-bottom-info">
+          {selectedSiswaData && selectedJenisData
+            ? <><b>{selectedSiswaData.nama}</b> · {selectedJenisData.nama} · <b>{poin} poin</b></>
+            : <span>Pilih siswa dan jenis pelanggaran</span>
+          }
+        </div>
+        <button
+          className="ip-submit-btn"
+          onClick={handleSubmit}
+          disabled={loadingSubmit || !selectedSiswaId || !selectedJenisId}
+        >
+          {loadingSubmit ? "Menyimpan..." : "Simpan Pelanggaran"}
+        </button>
+      </div>
+    </div>
+
+  </div>
+)}
             </>
           )}
 
@@ -509,6 +672,29 @@ export default function AdminPage() {
       </div>
 
       {/* MODALS tetap */}
+      {showPopup && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <div className="modal-header">
+              <h2>{popupType === "success" ? "Berhasil" : "Gagal"}</h2>
+              <span className="close-btn" onClick={() => setShowPopup(false)}>×</span>
+            </div>
+            <div className="modal-body">
+              <p>{popupMessage}</p>
+            </div>
+            <div className="modal-actions">
+              <button
+                className={popupType === "success" ? "btn-yes" : "btn-no"}
+                style={popupType === "success" ? { background: "linear-gradient(90deg,#4C7CF3,#5C3ECF)" } : {}}
+                onClick={() => setShowPopup(false)}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showSetting && (
         <div className="modal-overlay">
           <div className="modal-box">

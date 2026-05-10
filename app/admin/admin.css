@@ -545,3 +545,378 @@
   font-size: 15px;
   padding: 20px 0;
 }
+
+/* ===== INPUT PELANGGARAN FULLPAGE (admin) ===== */
+.ip-fullpage {
+  display: flex;
+  height: calc(100vh - 70px);
+  gap: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+.ip-left-panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #E2E8F0;
+}
+.ip-panel-header { padding: 22px 18px 14px; border-bottom: 1px solid #E2E8F0; }
+.ip-panel-header h2 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 3px; }
+.ip-search-wrap { position: relative; margin-top: 12px; }
+.ip-search-input { width: 100%; padding: 9px 10px; border: 1px solid #ddd; border-radius: 10px; font-family: 'Inika', serif; font-size: 13px; outline: none; box-sizing: border-box; }
+.ip-search-input:focus { border-color: #4C7CF3; }
+.ip-siswa-list { flex: 1; overflow-y: auto; padding: 8px 10px; }
+.ip-siswa-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+.ip-siswa-item:hover { background: #f3f4fb; }
+.ip-siswa-selected { background: linear-gradient(90deg, #4C7CF3, #5C3ECF) !important; }
+.ip-siswa-selected .ip-s-name,
+.ip-siswa-selected .ip-s-meta,
+.ip-siswa-selected .ip-s-kelas { color: white !important; }
+.ip-siswa-selected .ip-s-kelas { background: rgba(255,255,255,0.2) !important; }
+.ip-s-ava { width: 36px; height: 36px; border-radius: 50%; background: #5C6BFF; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ip-s-info { flex: 1; min-width: 0; }
+.ip-s-name { font-size: 13px; font-weight: 600; color: #111827; }
+.ip-s-meta { font-size: 11px; color: #9CA3AF; }
+
+.ip-right-panel { flex: 1; display: flex; flex-direction: column; background: #f8faff; overflow: hidden; }
+.ip-right-scroll { flex: 1; overflow-y: auto; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+.ip-sel-badge { display: flex; align-items: center; gap: 14px; background: white; border-radius: 14px; padding: 16px 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.ip-sel-ava { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#4C7CF3,#5C3ECF); color: white; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ip-sel-badge h3 { font-size: 15px; font-weight: 700; color: #111827; }
+.ip-placeholder { background: white; border-radius: 14px; padding: 18px; color: #CBD5E0; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.ip-section-card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.ip-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9CA3AF; margin-bottom: 12px; }
+.ip-jenis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ip-jenis-btn { border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 10px 12px; cursor: pointer; background: white; text-align: left; font-family: 'Inika', serif; transition: all 0.15s; }
+.ip-jenis-btn:hover { border-color: #4C7CF3; background: #f3f4fb; }
+.ip-jenis-active { border-color: #4C7CF3 !important; background: #EEF2FF !important; }
+.ip-jb-name { font-size: 13px; font-weight: 600; color: #374151; }
+.ip-jb-poin { font-size: 12px; color: #9CA3AF; margin-top: 3px; }
+.ip-jenis-active .ip-jb-name { color: #4C7CF3; }
+.ip-poin-num { font-size: 38px; font-weight: 700; color: #4C7CF3; line-height: 1; }
+.ip-textarea { width: 100%; border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 10px 12px; font-family: 'Inika', serif; font-size: 13px; color: #374151; resize: none; outline: none; box-sizing: border-box; }
+.ip-textarea:focus { border-color: #4C7CF3; }
+.ip-bukti-area { display: block; border: 2px dashed #C7D2FE; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #F5F7FF; transition: all 0.2s; }
+.ip-bukti-area:hover { border-color: #4C7CF3; background: #EEF2FF; }
+.ip-bukti-icon { font-size: 26px; margin-bottom: 6px; }
+.ip-bukti-text { font-size: 13px; color: #6B7280; }
+.ip-bukti-sub { font-size: 11px; color: #CBD5E0; margin-top: 4px; }
+.ip-preview-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ip-preview-del { position: relative; }
+.ip-preview-img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid #E2E8F0; display: block; }
+.ip-preview-del button { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #ef4444; color: white; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.ip-s-kelas { font-size: 11px; background: #e0e7ff; color: #4338CA; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+.ip-bottom-bar { display: flex; align-items: center; justify-content: space-between; background: white; padding: 14px 24px; border-top: 1px solid #E2E8F0; flex-shrink: 0; }
+.ip-bottom-info { font-size: 13px; color: #9CA3AF; }
+.ip-submit-btn { padding: 11px 28px; background: linear-gradient(90deg,#4C7CF3,#5C3ECF); color: white; border: none; border-radius: 12px; font-family: 'Inika', serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.ip-submit-btn:hover { opacity: 0.9; }
+.ip-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media screen and (max-width: 768px) {
+ 
+  /* ── Layout utama ── */
+  .admin-container {
+    flex-direction: column;
+    height: auto;
+  }
+ 
+  /* ── Sidebar: horizontal scroll (sama seperti pembina) ── */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    border-right: none;
+  }
+ 
+  .logo-box {
+    margin-bottom: 20px;
+  }
+ 
+  .menu-list {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 5px;
+  }
+ 
+  .menu-item {
+    min-width: fit-content;
+    padding: 10px 14px;
+    font-size: 14px;
+    white-space: nowrap;
+    flex-direction: row;
+  }
+ 
+  .menu-item span {
+    font-size: 14px;
+  }
+ 
+  .icon {
+    width: 20px;
+  }
+ 
+  .sidebar-bottom {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;          /* kiri-kanan */
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+ 
+  /* Biar tombol tidak terlalu mepet */
+  .sidebar-bottom .menu-item {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 14px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+ 
+  /* ── Topbar ── */
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 15px;
+    gap: 15px;
+  }
+ 
+  .search-input {
+    width: 100%;
+    font-size: 13px;
+  }
+ 
+  .topbar-right {
+    margin-left: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+  }
+ 
+  .profile-text .name {
+    font-size: 13px;
+  }
+ 
+  .profile-text .role {
+    font-size: 11px;
+  }
+ 
+  /* ── Content ── */
+  .content {
+    padding: 20px 15px;
+  }
+ 
+  /* ── Home ── */
+  .welcome-box {
+    padding: 20px;
+  }
+ 
+  .welcome-box h1 {
+    font-size: 20px;
+  }
+ 
+  .welcome-box p {
+    font-size: 13px;
+  }
+ 
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 15px;
+  }
+ 
+  .stat-card {
+    padding: 20px;
+  }
+ 
+  .stat-card h2 {
+    font-size: 26px;
+  }
+ 
+  .stat-card p {
+    font-size: 13px;
+  }
+ 
+  /* ── Siswa & Kasus ── */
+  .siswa-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+ 
+  .siswa-card {
+    padding: 16px;
+    align-items: flex-start;
+  }
+ 
+  .siswa-avatar {
+    width: 42px;
+    height: 42px;
+    font-size: 13px;
+  }
+ 
+  .siswa-info h3 {
+    font-size: 14px;
+  }
+ 
+  .siswa-info p {
+    font-size: 12px;
+  }
+ 
+  /* ── Search ── */
+  .search-title {
+    font-size: 18px;
+  }
+ 
+  /* ── Pagination ── */
+  .pagination {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+ 
+  .pagination span {
+    font-size: 13px;
+  }
+ 
+  .pagination button {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+ 
+  /* ── Modal ── */
+  .modal-box {
+    width: 90%;
+    padding: 20px;
+  }
+ 
+  .modal-header h2 {
+    font-size: 18px;
+  }
+ 
+  .modal-body {
+    font-size: 13px;
+  }
+ 
+  .modal-actions {
+    flex-direction: column;
+  }
+ 
+  .btn-yes,
+  .btn-no {
+    width: 100%;
+    text-align: center;
+  }
+ 
+  /* ── Input Pelanggaran ── */
+  .ip-fullpage {
+    flex-direction: column;
+    height: auto;
+    border-radius: 12px;
+    overflow: visible;
+  }
+ 
+  .ip-left-panel {
+    width: 100%;
+    height: 260px;
+    border-right: none;
+    border-bottom: 1px solid #E2E8F0;
+  }
+ 
+  .ip-panel-header {
+    padding: 14px 14px 10px;
+  }
+ 
+  .ip-panel-header h2 {
+    font-size: 15px;
+  }
+ 
+  .ip-right-panel {
+    width: 100%;
+  }
+ 
+  .ip-right-scroll {
+    padding: 15px;
+    gap: 12px;
+    overflow: visible;
+  }
+ 
+  .ip-sel-badge {
+    flex-direction: row;
+    align-items: center;
+  }
+ 
+  .ip-jenis-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .ip-jenis-btn {
+    padding: 10px 12px;
+  }
+ 
+  .ip-section-card {
+    padding: 15px;
+  }
+ 
+  .ip-poin-num {
+    font-size: 30px;
+  }
+ 
+  .ip-preview-img {
+    width: 56px;
+    height: 56px;
+  }
+ 
+  .ip-bottom-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 15px;
+  }
+ 
+  .ip-submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+ 
+  .ip-bottom-info {
+    font-size: 12px;
+    text-align: center;
+  }
+}
+ 
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+ 
+  .sidebar {
+    width: 200px;
+    padding: 15px 12px;
+  }
+ 
+  .menu-item span {
+    font-size: 13px;
+  }
+ 
+  .topbar {
+    padding: 0 20px;
+  }
+ 
+  .search-input {
+    width: 220px;
+  }
+ 
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .siswa-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .ip-left-panel {
+    width: 280px;
+  }
+}

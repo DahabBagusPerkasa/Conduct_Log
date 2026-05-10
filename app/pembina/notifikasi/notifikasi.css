@@ -227,3 +227,158 @@
   text-align: center;
   margin: 0;
 }
+
+@media screen and (max-width: 768px) {
+ 
+  .notif-page {
+    padding: 20px 14px 24px;
+  }
+ 
+  /* ── Header ── */
+  .notif-page-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+ 
+  .notif-page-title h1 {
+    font-size: 24px;
+  }
+ 
+  .notif-back-btn {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+ 
+  /* ── Card wrap ── */
+  .notif-card-wrap {
+    border-radius: 14px;
+  }
+ 
+  /* ── Item ── */
+  .notif-item {
+    padding: 16px 16px 12px;
+  }
+ 
+  .notif-item--unread {
+    border-left: 3px solid #4C7CF3;
+  }
+ 
+  /* ── Top row ── */
+  .notif-item-top-row {
+    margin-bottom: 8px;
+  }
+ 
+  .notif-sender-label {
+    font-size: 13px;
+  }
+ 
+  /* ── Row utama: ubah jadi kolom ── */
+  .notif-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+ 
+  .notif-left {
+    min-width: unset;
+  }
+ 
+  .notif-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+  }
+ 
+  .notif-sender-name {
+    font-size: 14px;
+  }
+ 
+  .notif-sender-role {
+    font-size: 12px;
+  }
+ 
+  /* ── Right panel: rata kiri ── */
+  .notif-right {
+    align-items: flex-start;
+  }
+ 
+  .notif-info-row {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+ 
+  .notif-siswa-name {
+    font-size: 14px;
+  }
+ 
+  .notif-poin-badge {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+ 
+  .notif-desc {
+    font-size: 13px;
+  }
+ 
+  /* ── Tombol Accept / Tolak: full width ── */
+  .notif-actions {
+    width: 100%;
+    gap: 8px;
+  }
+ 
+  .notif-actions .btn-accept,
+  .notif-actions .btn-reject {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 10px;
+    font-size: 14px;
+  }
+ 
+  /* ── Timestamp ── */
+  .notif-timestamp {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+ 
+  /* ── Divider ── */
+  .notif-divider {
+    margin: 0 16px;
+  }
+ 
+  /* ── Modal ── */
+  .modal-box {
+    width: 90vw;
+    padding: 18px;
+  }
+ 
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+ 
+  .notif-reject-submit,
+  .btn-no {
+    width: 100%;
+    text-align: center;
+  }
+}
+ 
+@media (min-width: 769px) and (max-width: 1024px) {
+ 
+  .notif-page {
+    padding: 28px 30px;
+  }
+ 
+  .notif-page-title h1 {
+    font-size: 28px;
+  }
+ 
+  .notif-item {
+    padding: 18px 24px 14px;
+  }
+ 
+  .notif-divider {
+    margin: 0 24px;
+  }
+}

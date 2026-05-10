@@ -16,6 +16,7 @@ export default function WalasPage() {
 
   const [showSetting, setShowSetting] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
 
   const [dataSiswa, setDataSiswa] = useState<any[]>([]);
   const [loadingSiswa, setLoadingSiswa] = useState(false);
@@ -67,6 +68,28 @@ export default function WalasPage() {
 
     fetchSession();
   }, [router]);
+
+  const fetchNotifCount = async () => {
+    if (!userData) return;
+
+    const { count, error } = await supabase
+      .from("notifikasi")
+      .select("*", { count: "exact", head: true })
+      .eq("target_role", "walas")
+      .eq("target_nisnip", userData.nisnip)
+      .eq("is_read", false);
+
+    if (error) {
+      console.error("FETCH NOTIF COUNT ERROR:", error);
+      return;
+    }
+
+    setNotifCount(count || 0);
+  };
+
+  useEffect(() => {
+    if (userData) fetchNotifCount();
+  }, [userData]);
 
   // ================= FETCH SISWA =================
   const fetchSiswa = async () => {
@@ -284,9 +307,13 @@ export default function WalasPage() {
             className="search-input"
           />
           <div className="topbar-right">
-            <div className="notif-wrapper">
+            <div
+              className="notif-wrapper"
+              onClick={() => router.push("/walas/notifikasi")}
+              style={{ cursor: "pointer" }}
+            >
               <img src="/assets/img/notifikasi.png" className="icon" />
-              <span className="notif-badge">3</span>
+              {notifCount > 0 && <span className="notif-badge">{notifCount}</span>}
             </div>
             <div className="profile">
               <div className="avatar">{getInitial(userData?.nama)}</div>

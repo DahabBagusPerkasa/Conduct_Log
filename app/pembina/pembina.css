@@ -96,7 +96,7 @@
   height: 70px;
   background: white;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 0 30px;
   border-bottom: 1px solid #eee;
@@ -115,6 +115,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  margin-left: auto;
 }
 
 .notif-wrapper {

@@ -112,7 +112,7 @@
   height: 70px;
   background: white;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 0 30px;
   border-bottom: 1px solid #eee;
@@ -131,6 +131,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  margin-left: auto;
 }
 
 .notif-wrapper {
@@ -604,5 +605,294 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* ========================================
+   MOBILE RESPONSIVE — Siswa
+   Paste di bagian PALING BAWAH siswa.css
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+
+  /* ── Layout utama ── */
+  .siswa-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  /* ── Sidebar: horizontal scroll (sama seperti pembina & admin) ── */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    border-right: none;
+  }
+
+  .logo-box {
+    margin-bottom: 20px;
+  }
+
+  .menu-list {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 5px;
+  }
+
+  .menu-item {
+    min-width: fit-content;
+    padding: 10px 14px;
+    font-size: 14px;
+    white-space: nowrap;
+    flex-direction: row;
+  }
+
+  .menu-item span {
+    font-size: 14px;
+  }
+
+  .icon {
+    width: 20px;
+  }
+
+  .sidebar-bottom {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar-bottom .menu-item {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 15px;
+    gap: 15px;
+    justify-content: flex-start;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .topbar-right {
+    margin-left: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .profile-text .name {
+    font-size: 13px;
+  }
+
+  .profile-text .role {
+    font-size: 11px;
+  }
+
+  /* ── Content ── */
+  .content {
+    padding: 20px 15px;
+    justify-content: flex-start;
+  }
+
+  /* ── Home ── */
+  .home-container {
+    gap: 24px;
+  }
+
+  .home-welcome h1 {
+    font-size: 18px;
+  }
+
+  .home-welcome p {
+    font-size: 13px;
+  }
+
+  .home-nav-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .nav-card {
+    padding: 30px 20px;
+    gap: 12px;
+  }
+
+  .nav-card-icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .nav-card-label {
+    font-size: 16px;
+  }
+
+  .nav-card-btn {
+    padding: 11px;
+    font-size: 14px;
+  }
+
+  /* ── Inner container (Status & Pelanggaran) ── */
+  .inner-container {
+    gap: 14px;
+  }
+
+  .page-title-center {
+    font-size: 20px;
+  }
+
+  /* ── Info row 3 kolom → 1 kolom ── */
+  .info-row.three-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Info row 2 kolom tidak rata → 1 kolom ── */
+  .info-row.two-col-unequal {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding: 18px 18px;
+  }
+
+  .info-card:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 15px;
+  }
+
+  /* ── Poin besar ── */
+  .poin-big {
+    font-size: 36px;
+  }
+
+  .shield-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* ── Status ── */
+  .status-text {
+    font-size: 18px;
+  }
+
+  /* ── Detail row 2 kolom → 1 kolom ── */
+  .detail-row.two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-col {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding: 18px;
+    min-height: auto;
+  }
+
+  .detail-col:last-child {
+    border-bottom: none;
+  }
+
+  .detail-col-title {
+    font-size: 14px;
+  }
+
+  .detail-item {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  /* ── Catatan card ── */
+  .catatan-card {
+    padding: 18px;
+  }
+
+  .catatan-title {
+    font-size: 16px;
+  }
+
+  /* ── Modal ── */
+  .modal-box {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    font-size: 13px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-yes,
+  .btn-no {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── Footer ── */
+  .page-footer {
+    font-size: 11px;
+    margin-top: 20px;
+    padding: 15px 0;
+  }
+}
+
+/* ── Tablet ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .sidebar {
+    width: 200px;
+    padding: 15px 12px;
+  }
+
+  .menu-item span {
+    font-size: 13px;
+  }
+
+  .topbar {
+    padding: 0 20px;
+  }
+
+  .home-nav-cards {
+    gap: 24px;
+  }
+
+  .info-row.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .info-row.two-col-unequal {
+    grid-template-columns: 1.2fr 1fr;
+  }
+
+  .detail-row.two-col {
+    grid-template-columns: 1fr 1fr;
   }
 }
